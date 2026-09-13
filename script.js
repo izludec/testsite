@@ -4,7 +4,7 @@ const menu=document.querySelector('.menu-toggle');const nav=document.querySelect
 function closeMenu(){menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Открыть меню');nav.classList.remove('open');}
 menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Закрыть меню':'Открыть меню');nav.classList.toggle('open',open);});
 nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&nav.classList.contains('open')){closeMenu();menu.focus();}});
-const canvas=document.querySelector('.ambient-canvas');const ctx=canvas.getContext('2d');const motionButton=document.querySelector('.motion-toggle');
+const canvas=document.querySelector('.ambient-canvas');const ctx=canvas.getContext('2d');
 let paused=motionPreference.matches;let frame=0;let last=0;let elapsed=0;let width=0;let height=0;let particles=[];
 function resize(){width=window.innerWidth;height=window.innerHeight;const dpr=Math.min(window.devicePixelRatio||1,1.5);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx?.setTransform(dpr,0,0,dpr,0,0);particles=Array.from({length:width<700?24:48},(_,i)=>({x:((i*137.508)%1000)/1000*width,y:((i*231.71)%1000)/1000*height,speed:.3+(i%5)*.12,phase:i*1.3}));draw();}
 function draw(){if(!ctx)return;ctx.clearRect(0,0,width,height);const t=elapsed*.00013;const glow=ctx.createRadialGradient(width*(.68+Math.sin(t)*.16),height*.35,0,width*.7,height*.4,width*.7);glow.addColorStop(0,'rgba(54,127,158,.17)');glow.addColorStop(.5,'rgba(35,96,126,.07)');glow.addColorStop(1,'rgba(11,15,18,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
@@ -14,8 +14,8 @@ positions.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,i%7===0?1.8:1,0,Math.P
 // Slow waves stay behind the content and never intercept interactions.
 for(let line=0;line<3;line++){ctx.beginPath();for(let x=0;x<=width;x+=14){const y=height*(.42+line*.055)+Math.sin(x/width*5+t+line*.6)*height*.12; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.strokeStyle=`rgba(114,205,231,${.08-line*.016})`;ctx.lineWidth=1;ctx.stroke();}}
 function tick(now){frame=0;if(paused||document.hidden)return;if(now-last>=33){elapsed+=Math.min(now-last,50);last=now;draw();}frame=requestAnimationFrame(tick);}
-function syncMotion(){cancelAnimationFrame(frame);frame=0;last=performance.now();document.body.classList.toggle('motion-paused',paused);motionButton.setAttribute('aria-pressed',String(paused));motionButton.setAttribute('aria-label',paused?'Включить анимацию фона':'Приостановить анимацию фона');motionButton.querySelector('.motion-icon').textContent=paused?'▷':'Ⅱ';if(!paused&&!document.hidden&&ctx)frame=requestAnimationFrame(tick);else draw();}
-motionButton.addEventListener('click',()=>{paused=!paused;syncMotion();});motionPreference.addEventListener('change',e=>{paused=e.matches;if(e.matches)document.documentElement.classList.remove('js-motion');syncMotion();});document.addEventListener('visibilitychange',syncMotion);window.addEventListener('resize',resize,{passive:true});resize();syncMotion();
+function syncMotion(){cancelAnimationFrame(frame);frame=0;last=performance.now();document.body.classList.toggle('motion-paused',paused);if(!paused&&!document.hidden&&ctx)frame=requestAnimationFrame(tick);else draw();}
+motionPreference.addEventListener('change',e=>{paused=e.matches;if(e.matches)document.documentElement.classList.remove('js-motion');syncMotion();});document.addEventListener('visibilitychange',syncMotion);window.addEventListener('resize',resize,{passive:true});resize();syncMotion();
 const hero=document.querySelector('.hero');
 const chip=document.querySelector('.hero-visual');
 const finePointer=window.matchMedia('(hover: hover) and (pointer: fine)');
